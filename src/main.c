@@ -6,6 +6,10 @@
 #include "job.h"
 #include "logger.h"
 #include "scheduler.h"
+#include "ipc.h"
+#include "bankers.h"
+#include "worker.h"
+#include "rlimits.h"
 
 static int read_integer(const char *prompt, int minimum, int maximum, int *value)
 {
@@ -109,8 +113,9 @@ int main(void)
     {
         int result;
 
-        printf("\n1. Add job\n2. List jobs\n3. Run FCFS\n4. Run Round Robin\n5. Run Priority\n6. Exit\n");
-        result = read_integer("Choose an option: ", 1, 6, &choice);
+        printf("\n1. Add job\n2. List jobs\n3. Run FCFS\n4. Run Round Robin\n5. Run Priority\n"
+               "6. IPC demo\n7. Banker's Algorithm\n8. Worker failure demo\n9. Resource limits demo\n10. Exit\n");
+        result = read_integer("Choose an option: ", 1, 10, &choice);
         if (result == 0)
         {
             printf("\nEnd of input received. Cleaning up.\n");
@@ -160,6 +165,26 @@ int main(void)
             {
                 run_priority(jobs, count, &logger);
             }
+        }
+        else if (choice == 6)
+        {
+            logger_log(&logger, "FR4 IPC demo started");
+            ipc_demo();
+        }
+        else if (choice == 7)
+        {
+            logger_log(&logger, "FR5 Banker's demo started");
+            bankers_demo();
+        }
+        else if (choice == 8)
+        {
+            logger_log(&logger, "FR6 worker demo started");
+            worker_demo();
+        }
+        else if (choice == 9)
+        {
+            logger_log(&logger, "FR7 limits demo started");
+            limits_demo();
         }
         else
         {

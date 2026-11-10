@@ -1,18 +1,26 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -Iinclude
+CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -D_POSIX_C_SOURCE=200809L -Iinclude
 TARGET = campuscompute
-SOURCES = src/main.c src/scheduler.c src/logger.c
 
-ifeq ($(OS),Windows_NT)
-THREAD_FLAGS =
+# Person 1: scheduling and logging
+SOURCES = src/main.c src/scheduler.c src/logger.c
+# Person 2: IPC, Banker's, worker failure, resource limits
+SOURCES += src/ipc.c src/bankers.c src/worker.c src/rlimits.c
+
+HEADERS = include/job.h include/logger.h include/scheduler.h \
+          include/ipc.h include/bankers.h include/worker.h include/rlimits.h
+
+# POSIX shared memory and semaphores need -lrt on Linux (macOS has no librt)
+ifeq ($(shell uname -s),Linux)
+LIBS = -lrt
 else
-THREAD_FLAGS = -pthread
+LIBS =
 endif
 
 all: $(TARGET)
 
-$(TARGET): $(SOURCES) include/job.h include/logger.h include/scheduler.h
-	$(CC) $(CFLAGS) $(THREAD_FLAGS) $(SOURCES) -o $(TARGET)
+$(TARGET): $(SOURCES) $(HEADERS)
+	$(CC) $(CFLAGS) -pthread $(SOURCES) -o $(TARGET) $(LIBS)
 
 clean:
 	rm -f $(TARGET) campuscompute.log
